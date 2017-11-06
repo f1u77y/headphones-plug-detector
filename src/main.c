@@ -1,6 +1,7 @@
 #include <pulse/subscribe.h>
 #include <pulse/mainloop.h>
 #include <pulse/introspect.h>
+#include <glib.h>
 #include <stdio.h>
 #include <inttypes.h>
 #include <assert.h>
@@ -8,8 +9,8 @@
 #include <stdbool.h>
 #include <string.h>
 
+#include "mpris.h"
 
-#define UNUSED __attribute__((unused))
 
 enum port_type {
   PORT_TYPE_UNKNOWN,
@@ -33,21 +34,32 @@ get_port_type(pa_sink_port_info *port) {
 }
 
 void
-sink_changed_callback(pa_context * UNUSED ctx,
+sink_changed_callback(pa_context * G_GNUC_UNUSED ctx,
                       const pa_sink_info *info,
                       int eol,
-                      void * UNUSED userdata)
+                      void* userdata)
 {
   if (eol) return;
+
+  GList** last_paused_players = userdata;
+
   enum port_type cur_port_type = get_port_type(info->active_port);
   if (cur_port_type == last_port_type) {
     return;
   } else if (cur_port_type == PORT_TYPE_SPEAKER) {
-    // pause
-    printf("%s\n", "should pause");
+    GList* players = get_playing_players();
+    for (GList* elem = players; elem != NULL; elem = elem->next) {
+      pause_player_by_name(elem->data);
+      *last_paused_players = g_list_prepend(*last_paused_players, strdup(elem->data));
+    }
   } else if (cur_port_type == PORT_TYPE_HEADPHONES) {
-    // play
-    printf("%s\n", "should play");
+    GList* elem = *last_paused_players;
+    while (elem != NULL) {
+      GList* next = elem->next;
+      play_player_by_name(elem->data);
+      *last_paused_players = g_list_delete_link(*last_paused_players, elem);
+      elem = next;
+    }
   }
   last_port_type = cur_port_type;
 }
@@ -56,22 +68,21 @@ void
 subscribe_callback(pa_context *ctx,
                    pa_subscription_event_type_t type,
                    uint32_t idx,
-                   void * UNUSED userdata)
+                   void* userdata)
 {
   if ((type & PA_SUBSCRIPTION_EVENT_TYPE_MASK) != PA_SUBSCRIPTION_EVENT_CHANGE) return;
-  pa_context_get_sink_info_by_index(ctx, idx, sink_changed_callback, NULL);
+  pa_context_get_sink_info_by_index(ctx, idx, sink_changed_callback, userdata);
 }
 
 
-
 void
-context_state_callback(pa_context *ctx, void * UNUSED userdata) {
+context_state_callback(pa_context *ctx, void* userdata) {
   switch (pa_context_get_state(ctx)) {
   case PA_CONTEXT_READY:
-    pa_context_set_subscribe_callback(ctx, subscribe_callback, NULL);
+    pa_context_set_subscribe_callback(ctx, subscribe_callback, userdata);
     if (!pa_context_subscribe(ctx, (pa_subscription_mask_t)
                               PA_SUBSCRIPTION_MASK_SINK,
-                              NULL, NULL))
+                              NULL, userdata))
     {
       perror("Subscribtion failed!\n");
       return;
@@ -81,9 +92,9 @@ context_state_callback(pa_context *ctx, void * UNUSED userdata) {
   }
 }
 
-
 int
-main() {
+main()
+{
   pa_mainloop *loop = pa_mainloop_new();
   pa_mainloop_api *api = pa_mainloop_get_api(loop);
 
@@ -98,7 +109,9 @@ main() {
   pa_proplist_free(proplist);
   proplist = NULL;
 
-  pa_context_set_state_callback(ctx, context_state_callback, NULL);
+  GList* players = NULL;
+
+  pa_context_set_state_callback(ctx, context_state_callback, &players);
 
   if (pa_context_connect(ctx, NULL, PA_CONTEXT_NOFAIL, NULL) < 0) {
     perror("Connection failed\n");
