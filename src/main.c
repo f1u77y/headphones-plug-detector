@@ -21,7 +21,8 @@ enum port_type {
 enum port_type last_port_type = PORT_TYPE_UNKNOWN;
 
 enum port_type
-get_port_type(pa_sink_port_info *port) {
+get_port_type(pa_sink_port_info* port)
+{
   if (!port) {
     return PORT_TYPE_UNKNOWN;
   } else if (strstr(port->name, "speaker")) {
@@ -34,8 +35,8 @@ get_port_type(pa_sink_port_info *port) {
 }
 
 void
-sink_changed_callback(pa_context * G_GNUC_UNUSED ctx,
-                      const pa_sink_info *info,
+sink_changed_callback(pa_context* G_GNUC_UNUSED ctx,
+                      const pa_sink_info* info,
                       int eol,
                       void* userdata)
 {
@@ -65,7 +66,7 @@ sink_changed_callback(pa_context * G_GNUC_UNUSED ctx,
 }
 
 void
-subscribe_callback(pa_context *ctx,
+subscribe_callback(pa_context* ctx,
                    pa_subscription_event_type_t type,
                    uint32_t idx,
                    void* userdata)
@@ -76,7 +77,8 @@ subscribe_callback(pa_context *ctx,
 
 
 void
-context_state_callback(pa_context *ctx, void* userdata) {
+context_state_callback(pa_context* ctx, void* userdata)
+{
   switch (pa_context_get_state(ctx)) {
   case PA_CONTEXT_READY:
     pa_context_set_subscribe_callback(ctx, subscribe_callback, userdata);
@@ -95,15 +97,15 @@ context_state_callback(pa_context *ctx, void* userdata) {
 int
 main()
 {
-  pa_mainloop *loop = pa_mainloop_new();
-  pa_mainloop_api *api = pa_mainloop_get_api(loop);
+  pa_mainloop* loop = pa_mainloop_new();
+  pa_mainloop_api* api = pa_mainloop_get_api(loop);
 
-  pa_proplist *proplist = pa_proplist_new();
+  pa_proplist* proplist = pa_proplist_new();
   pa_proplist_sets(proplist, PA_PROP_APPLICATION_NAME, "HPD");
   pa_proplist_sets(proplist, PA_PROP_APPLICATION_ID, "me.f1u77y.hpd");
   pa_proplist_sets(proplist, PA_PROP_APPLICATION_VERSION, "0.1.0");
 
-  pa_context *ctx = pa_context_new_with_proplist(api, NULL, proplist);
+  pa_context* ctx = pa_context_new_with_proplist(api, NULL, proplist);
   assert(ctx);
 
   pa_proplist_free(proplist);
