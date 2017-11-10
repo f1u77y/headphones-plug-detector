@@ -23,10 +23,8 @@ org_freedesktop_dbus_proxy(GError** error)
                                             "org.freedesktop.DBus",
                                             NULL, // cancellable
                                             error);
-  if (!proxy) {
-    g_object_unref(bus);
-    return NULL;
-  }
+  g_object_unref(bus);
+  return proxy;
 }
 
 static GList*
@@ -91,8 +89,7 @@ get_player_by_name(const gchar* name, GError** error)
 static gboolean
 is_player_playing(const gchar* name)
 {
-  GError* error = NULL;
-  MediaPlayer2Player* player = get_player_by_name(name, &error);
+  MediaPlayer2Player* player = get_player_by_name(name, NULL);
   if (!player) {
     g_object_unref(player);
     return FALSE;
@@ -133,6 +130,7 @@ with_player_do(const gchar* name, WithPlayerCallback callback)
   }
 
   gboolean result = callback(player, NULL, &error);
+  g_object_unref(player);
   if (!result) {
     g_warning("%s", error->message);
     g_error_free(error);
