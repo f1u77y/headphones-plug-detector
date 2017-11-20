@@ -1,5 +1,5 @@
-cmake_minimum_required(VERSION 2.8)
-project(headphones-plug-detector C)
+cmake_minimum_required (VERSION 2.8)
+project (headphones-plug-detector C)
 
 set (CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake")
 include (gdbus_codegen)
@@ -27,21 +27,21 @@ find_package (PkgConfig REQUIRED)
 pkg_check_modules (GLIB REQUIRED glib-2.0)
 pkg_check_modules (GIO_UNIX REQUIRED gio-unix-2.0)
 
-add_executable(${PROJECT_NAME}
+add_executable (${PROJECT_NAME}
   "${MPRIS_GENERATED_DIR}/mpris-core.c"
   "${MPRIS_GENERATED_DIR}/mpris-player.c"
   src/main.c
   src/mpris.c
 )
 
-target_include_directories(${PROJECT_NAME} PUBLIC
+target_include_directories (${PROJECT_NAME} PUBLIC
   include
   ${MPRIS_GENERATED_DIR}
   ${PULSEAUDIO_INCLUDE_DIR}
   ${GLIB_INCLIDE_DIRS}
   ${GIO_UNIX_INCLUDE_DIRS}
 )
-target_link_libraries(${PROJECT_NAME}
+target_link_libraries (${PROJECT_NAME}
   ${PULSEAUDIO_LIBRARY}
   ${PULSEAUDIO_MAINLOOP_LIBRARY}
   ${GLIB_LIBRARIES}
