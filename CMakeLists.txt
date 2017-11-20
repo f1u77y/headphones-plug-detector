@@ -47,3 +47,7 @@ target_link_libraries(${PROJECT_NAME}
   ${GLIB_LIBRARIES}
   ${GIO_UNIX_LIBRARIES}
 )
+
+install (TARGETS ${PROJECT_NAME}
+  DESTINATION bin
+)
