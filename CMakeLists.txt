@@ -4,6 +4,8 @@ project (headphones-plug-detector C)
 set (CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake")
 include (gdbus_codegen)
 
+option (ENABLE_SYSTEMD "Install systemd unit file" OFF)
+
 set (MPRIS_GENERATED_DIR "${PROJECT_BINARY_DIR}/mpris-generated")
 if (NOT EXISTS "${MPRIS_GENERATED_DIR}")
   file (MAKE_DIRECTORY "${MPRIS_GENERATED_DIR}")
@@ -47,6 +49,20 @@ target_link_libraries (${PROJECT_NAME}
   ${GLIB_LIBRARIES}
   ${GIO_UNIX_LIBRARIES}
 )
+
+set (EXECUTABLE_PATH "${CMAKE_INSTALL_PREFIX}/bin/${PROJECT_NAME}")
+
+if (ENABLE_SYSTEMD)
+  configure_file (
+    headphones-plug-detector.service
+    headphones-plug-detector.service
+    ESCAPE_QUOTES
+  )
+  install (
+    FILES "${CMAKE_BINARY_DIR}/headphones-plug-detector.service"
+    DESTINATION "/usr/lib/systemd/user"
+  )
+endif ()
 
 install (TARGETS ${PROJECT_NAME}
   DESTINATION bin

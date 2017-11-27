@@ -1,0 +1,10 @@
+[Unit]
+Description=Headphones plug detector
+After=pulseaudio.service dbus.socket
+Requires=pulseaudio.service dbus.socket
+
+[Service]
+ExecStart=@EXECUTABLE_PATH@
+
+[Install]
+WantedBy=default.target
