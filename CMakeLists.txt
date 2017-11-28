@@ -4,6 +4,9 @@ project (headphones-plug-detector C)
 set (CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake")
 include (gdbus_codegen)
 
+set (CMAKE_C_STANDARD 99)
+set (CMAKE_C_STANDARD_REQIRED ON)
+
 option (ENABLE_SYSTEMD "Install systemd unit file" OFF)
 
 set (MPRIS_GENERATED_DIR "${PROJECT_BINARY_DIR}/mpris-generated")
