@@ -27,7 +27,6 @@ generate_gdbus_code (
   INPUT "${MPRIS_SPEC_DIR}/org.mpris.MediaPlayer2.Player.xml"
 )
 
-find_package (PulseAudio REQUIRED)
 find_package (PkgConfig REQUIRED)
 pkg_check_modules (GLIB REQUIRED glib-2.0)
 pkg_check_modules (GIO_UNIX REQUIRED gio-unix-2.0)
@@ -42,13 +41,10 @@ add_executable (${PROJECT_NAME}
 target_include_directories (${PROJECT_NAME} PUBLIC
   include
   ${MPRIS_GENERATED_DIR}
-  ${PULSEAUDIO_INCLUDE_DIR}
   ${GLIB_INCLIDE_DIRS}
   ${GIO_UNIX_INCLUDE_DIRS}
 )
 target_link_libraries (${PROJECT_NAME}
-  ${PULSEAUDIO_LIBRARY}
-  ${PULSEAUDIO_MAINLOOP_LIBRARY}
   ${GLIB_LIBRARIES}
   ${GIO_UNIX_LIBRARIES}
 )

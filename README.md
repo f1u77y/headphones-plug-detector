@@ -2,11 +2,12 @@
 
 ## What does it do
 
-This program detects when you plug out your headphones and pauses music for you.
+This program uses [jacklistener](https://github.com/gentoo-root/jacklistener) to detect
+when you plug out your headphones and pauses music for you.
 When you plug them in again, it resumes all the players that were paused by this
 program.
 
-You need to use PulseAudio as music output and MPRIS-compliant audio players for
+You need jacklistener and MPRIS-compliant audio players for
 this program to work. If you're using some common DE (GNOME, KDE, Unity) and see
 the player widget on panel, then your player is MPRIS-compliant. Almost all common
 players with GUI (Clementine, Amarok, Deadbeef, etc.) are compliant (but some of them
@@ -25,5 +26,5 @@ doing :)
 
 ## Dependencies
 
-- `libpulse`
+- `jacklistener`
 - `glib2`
