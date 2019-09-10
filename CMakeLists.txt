@@ -8,12 +8,17 @@ set (CMAKE_C_STANDARD 99)
 set (CMAKE_C_STANDARD_REQIRED ON)
 
 option (ENABLE_SYSTEMD "Install systemd unit file" OFF)
+option (INSTALL_FOR_CURRENT_USER "Install for current user only" OFF)
 
 set (MPRIS_GENERATED_DIR "${PROJECT_BINARY_DIR}/mpris-generated")
 if (NOT EXISTS "${MPRIS_GENERATED_DIR}")
   file (MAKE_DIRECTORY "${MPRIS_GENERATED_DIR}")
 endif ()
 set (MPRIS_SPEC_DIR "${PROJECT_SOURCE_DIR}/third-party/mpris-spec")
+
+if (INSTALL_FOR_CURRENT_USER)
+  set (CMAKE_INSTALL_PREFIX "$ENV{HOME}/.local")
+endif ()
 
 generate_gdbus_code (
   OUTPUT "${MPRIS_GENERATED_DIR}/mpris-core"
@@ -57,10 +62,18 @@ if (ENABLE_SYSTEMD)
     headphones-plug-detector.service
     ESCAPE_QUOTES
   )
+
+  if (INSTALL_FOR_CURRENT_USER)
+  install (
+      FILES "${CMAKE_BINARY_DIR}/headphones-plug-detector.service"
+      DESTINATION "$ENV{HOME}/.config/systemd/user"
+  )
+  else()
   install (
     FILES "${CMAKE_BINARY_DIR}/headphones-plug-detector.service"
     DESTINATION "/usr/lib/systemd/user"
   )
+  endif ()
 endif ()
 
 install (TARGETS ${PROJECT_NAME}
